@@ -1,0 +1,15 @@
+﻿{
+  "applications": {
+    "ABPBoilerplateTeste.Angular": {
+      "type": "cli",
+      "workingDirectory": "../../angular",
+      "startCommand": "./start.ps1",
+      "launchUrl": "http://localhost:4200"
+    },
+    "ABPBoilerplateTeste": {
+      "type": "dotnet-project",
+      "launchUrl": "https://localhost:44313",
+      "path": "../../ABPBoilerplateTeste/ABPBoilerplateTeste.csproj"
+    }
+  }
+}

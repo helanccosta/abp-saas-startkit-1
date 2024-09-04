@@ -1,0 +1,102 @@
+version: '3.7'
+
+services:
+  abpboilerplateteste-web:
+    image: mycompanyname/abpboilerplateteste-web:latest
+    container_name: abpboilerplateteste-web
+    build:
+      context: ../../../
+      dockerfile: angular/Dockerfile.local      
+    ports:
+      - "4200:80"
+    depends_on:
+      - abpboilerplateteste-api
+    volumes:
+      - ./dynamic-env.json://usr/share/nginx/html/dynamic-env.json
+    networks:
+      - abp-network  
+
+  abpboilerplateteste-api:
+    image: mycompanyname/abpboilerplateteste-api:latest
+    container_name: abpboilerplateteste-api-container
+    build:
+      context: ../../
+      dockerfile: ABPBoilerplateTeste/Dockerfile.local
+    environment:
+      - ASPNETCORE_URLS=https://+:443;http://+:80;
+      - Kestrel__Certificates__Default__Path=/root/certificate/localhost.pfx
+      - Kestrel__Certificates__Default__Password=91f91912-5ab0-49df-8166-23377efaf3cc
+      - App__SelfUrl=https://localhost:44313
+      - AuthServer__Authority=http://abpboilerplateteste-api
+      - AuthServer__RequireHttpsMetadata=false
+      - AuthServer__SetSelfAsIssuer=true      
+      - Redis__Configuration=redis
+      - ConnectionStrings__Default=Data Source=sql-server;Initial Catalog=ABPBoilerplateTeste;User Id=sa;Password=myPassw0rd;MultipleActiveResultSets=true;Persist Security Info=True;
+    ports:
+      - "44313:443"
+    depends_on:
+      redis:
+        condition: service_healthy  
+      sql-server:
+        condition: service_healthy
+    restart: on-failure    
+    volumes:
+      - ./certs:/root/certificate
+    networks:
+      - abp-network  
+  
+  db-migrator:
+    image: mycompanyname/abpboilerplateteste-api:latest
+    container_name: db-migrator
+    build:
+      context: ../../
+      dockerfile: ABPBoilerplateTeste/Dockerfile.local
+    environment:
+      - ConnectionStrings__Default=Data Source=sql-server;Initial Catalog=ABPBoilerplateTeste;User Id=sa;Password=myPassw0rd;MultipleActiveResultSets=true;Persist Security Info=True;
+    command:
+      - --migrate-database
+    depends_on:
+      sql-server:
+        condition: service_healthy
+    networks:
+      - abp-network    
+  sql-server:
+    container_name: sql-server
+    image: mcr.microsoft.com/azure-sql-edge:1.0.7
+    ports:
+      - "1434:1433"
+    environment:
+      SA_PASSWORD: "myPassw0rd"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - sqldata:/var/opt/mssql
+      - sqldata:/var/opt/mssql-extensibility
+      - sqldata:/var/opt/mssql-extensibility/log
+      - sqldata:/var/opt/mssql-extensibility/data
+    networks:
+      - abp-network  
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S sql-server -U sa -P "myPassw0rd" -Q "SELECT 1" -b -o /dev/null
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  redis:
+    container_name: redis
+    image: redis:7.2.2-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - abp-network  
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]      
+
+volumes:
+  sqldata:
+    name: sqldata
+
+networks:
+  abp-network:
+    name: abpboilerplateteste-network
+    driver: bridge

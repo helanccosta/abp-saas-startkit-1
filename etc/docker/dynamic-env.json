@@ -1,0 +1,21 @@
+{
+  "production": true,
+  "application": {
+    "baseUrl":"http://localhost:4200",
+    "name": "ABPBoilerplateTeste",
+    "logoUrl": ""
+  },
+  "oAuthConfig": {
+    "issuer": "https://localhost:44313",
+    "redirectUri": "https://localhost:44313",
+    "clientId": "ABPBoilerplateTeste_App",
+    "responseType": "code",
+    "scope": "offline_access openid profile email phone ABPBoilerplateTeste"
+  },
+  "apis": {
+    "default": {
+      "url": "https://localhost:44313",
+      "rootNamespace": "ABPBoilerplateTeste"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "production": true,
+  "application": {
+    "baseUrl":"https://abpboilerplateteste-web",
+    "name": "ABPBoilerplateTeste",
+    "logoUrl": ""
+  },
+  "oAuthConfig": {
+    "issuer": "https://abpboilerplateteste-api/",
+    "redirectUri": "https://abpboilerplateteste",
+    "clientId": "ABPBoilerplateTeste_App",
+    "responseType": "code",
+    "scope": "offline_access openid profile email phone"
+  },
+  "apis": {
+    "default": {
+      "url": "https://abpboilerplateteste-api",
+      "rootNamespace": "ABPBoilerplateTeste"
+    }
+  }
+}
